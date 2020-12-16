@@ -7,7 +7,7 @@
 
 // Add in other families that use the same settings, e.g. stm32f0xx, etc
 
-// +build stm32,!stm32f103xx
+// +build stm32
 
 package stm32
 
