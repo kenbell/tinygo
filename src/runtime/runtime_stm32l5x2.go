@@ -22,12 +22,11 @@ func putchar(c byte) {
 }
 
 const (
-	HSE_STARTUP_TIMEOUT = 0x0500
-	PLL_M               = 1
-	PLL_N               = 55
-	PLL_P               = 7 // RCC_PLLP_DIV7
-	PLL_Q               = 2 // RCC_PLLQ_DIV2
-	PLL_R               = 2 // RCC_PLLR_DIV2
+	PLL_M = 1
+	PLL_N = 55
+	PLL_P = 7 // RCC_PLLP_DIV7
+	PLL_Q = 2 // RCC_PLLQ_DIV2
+	PLL_R = 2 // RCC_PLLR_DIV2
 )
 
 /*

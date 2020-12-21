@@ -8,6 +8,10 @@ import (
 )
 
 const (
+	HSE_FREQ = 16000000 // 16 MHz (note, not connected by default)
+)
+
+const (
 	LED         = LED_BUILTIN
 	LED_BUILTIN = LED_GREEN
 	LED_GREEN   = PC7
