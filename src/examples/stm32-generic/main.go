@@ -2,6 +2,8 @@ package main
 
 import (
 	"machine"
+	"runtime"
+	"time"
 )
 
 const (
@@ -17,17 +19,29 @@ const (
 	portJ
 )
 
+const PB0 = portB + 0
 const PB7 = portB + 7
+const PB14 = portB + 14
+
+const (
+	LED_GREEN = PB0
+	LED_BLUE  = PB7
+	LED_RED   = PB14
+)
 
 func main() {
-	PB7.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	LED_GREEN.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	LED_BLUE.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	LED_RED.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	board := board{}
+	board.Initialize()
+	runtime.Board = &board
 
 	for {
-		for i := 0; i < 1000000; i++ {
-			PB7.Low()
-		}
-		for i := 0; i < 1000000; i++ {
-			PB7.High()
-		}
+		time.Sleep(500 * time.Millisecond)
+		LED_GREEN.High()
+		time.Sleep(500 * time.Millisecond)
+		LED_GREEN.Low()
 	}
 }
