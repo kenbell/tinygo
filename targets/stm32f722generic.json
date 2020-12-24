@@ -1,6 +1,6 @@
 {
   "inherits": ["cortex-m7"],
-  "build-tags": ["stm32generic", "stm32f7x2", "stm32f7", "stm32"],
+  "build-tags": ["stm32generic", "stm32f722", "stm32f7x2", "stm32f7", "stm32"],
   "linkerscript": "targets/stm32f7x2zetx.ld",
   "extra-files": [
     "src/device/stm32/stm32f7x2.s"
