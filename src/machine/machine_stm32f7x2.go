@@ -1,4 +1,4 @@
-// +build stm32f7x2, !stm32generic
+// +build stm32f7x2,!stm32generic
 
 package machine
 

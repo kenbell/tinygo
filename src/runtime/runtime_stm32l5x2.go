@@ -1,4 +1,4 @@
-// +build stm32,stm32l5x2
+// +build stm32l5x2,!stm32generic
 
 package runtime
 
