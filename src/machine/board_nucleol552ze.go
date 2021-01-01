@@ -1,4 +1,4 @@
-// +build nucleol552ze
+// +build nucleol552ze,!stm32generic
 
 package machine
 

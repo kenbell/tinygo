@@ -2,58 +2,56 @@
 
 package runtime
 
-type CustomBoard interface {
-	SleepTicks(d int64)
-	Ticks() int64
-	TicksToNanoseconds(ticks int64) int64
-	NanosecondsToTicks(ns int64) int64
-	PutChar(c byte)
-}
-
-var Board CustomBoard
+var (
+	SleepTicksFn         func(d int64)
+	TicksFn              func() int64
+	TicksToNanosecondsFn func(ticks int64) int64
+	NanosecondsToTicksFn func(ns int64) int64
+	PutCharFn            func(c byte)
+)
 
 const asyncScheduler = false
 
 func putchar(c byte) {
-	if Board == nil {
+	if PutCharFn == nil {
 		return
 	}
 
-	Board.PutChar(c)
+	PutCharFn(c)
 }
 
 func ticksToNanoseconds(ticks timeUnit) int64 {
-	if Board == nil {
+	if TicksToNanosecondsFn == nil {
 		// Default to tick = 1ms
 		return int64(ticks) * 1000000
 	}
 
-	return Board.TicksToNanoseconds(int64(ticks))
+	return TicksToNanosecondsFn(int64(ticks))
 }
 
 func nanosecondsToTicks(ns int64) timeUnit {
-	if Board == nil {
+	if NanosecondsToTicksFn == nil {
 		// Default to tick = 1ms
 		return timeUnit(ns / 1000000)
 	}
 
-	return timeUnit(Board.NanosecondsToTicks(ns))
+	return timeUnit(NanosecondsToTicksFn(ns))
 }
 
 // sleepTicks should sleep for specific number of microseconds.
 func sleepTicks(d timeUnit) {
-	if Board == nil {
+	if SleepTicksFn == nil {
 		return
 	}
 
-	Board.SleepTicks(int64(d))
+	SleepTicksFn(int64(d))
 }
 
 // number of ticks (microseconds) since start.
 func ticks() timeUnit {
-	if Board == nil {
+	if TicksFn == nil {
 		return 0
 	}
 
-	return timeUnit(Board.Ticks())
+	return timeUnit(TicksFn())
 }
