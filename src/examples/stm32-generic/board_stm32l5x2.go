@@ -3,8 +3,6 @@
 package main
 
 import (
-	"device/arm"
-	"runtime/interrupt"
 	"runtime/volatile"
 
 	"github.com/kenbell/tinygo-stm32/clock"
@@ -54,55 +52,18 @@ var timerWakeup volatile.Register8
 
 var myBoard *board
 
-type board struct {
-	TickTimer  *timer.Timer
-	SleepTimer *timer.Timer
-	UART       *uart.UART
-}
-
 func (b *board) Initialize() {
 	myBoard = b
 
 	b.initClocks()
-	b.initTickTimer()
-	b.initSleepTimer()
+	b.initTickTimer(timer.TIM16)
+	b.initSleepTimer(timer.TIM15)
 
-	b.UART = uart.LPUART1
-	b.UART.Configure(uart.Config{
+	b.uart = uart.LPUART1
+	b.uart.Configure(uart.Config{
 		BaudRate: 115200,
 		Clock:    clock.SourcePCLK1,
 	})
-}
-
-func (b *board) SleepTicks(d int64) {
-	timerWakeup.Set(0)
-
-	b.startSleepTimer(d)
-
-	// wait till timer wakes up
-	for timerWakeup.Get() == 0 {
-		arm.Asm("wfi")
-	}
-}
-
-func (b *board) Ticks() int64 {
-	return int64(tickCount.Get())
-}
-
-func (b *board) TicksToNanoseconds(ticks int64) int64 {
-	return ticks * TICKS_PER_NS
-}
-
-func (b *board) NanosecondsToTicks(ns int64) int64 {
-	return ns / TICKS_PER_NS
-}
-
-func (b *board) PutChar(c byte) {
-	if b.UART == nil {
-		return
-	}
-
-	b.UART.WriteByte(c)
 }
 
 func (b *board) initClocks() {
@@ -152,52 +113,3 @@ func (b *board) initClocks() {
 	clock.PCLK2.ClockFrequency = PCLK2_FREQ
 }
 
-func (b *board) initSleepTimer() {
-	b.SleepTimer = timer.TIM15
-
-	intr := b.SleepTimer.NewInterrupt(handleWakeup)
-	intr.SetPriority(0xc3)
-	intr.Enable()
-}
-
-func (b *board) startSleepTimer(ticks int64) {
-	cfg := timer.Config{}
-	cfg.SetDelay(b.TicksToNanoseconds(ticks), b.SleepTimer.Clock)
-	b.SleepTimer.ConfigureBasic(&cfg)
-	b.SleepTimer.StartWithInterrupts()
-}
-
-func (b *board) initTickTimer() {
-	b.TickTimer = timer.TIM16
-
-	// Repeating timer, with prescale and period calculated
-	// from the tick rate
-	cfg := timer.Config{}
-	cfg.SetFrequency(TICK_RATE, b.TickTimer.Clock)
-
-	b.TickTimer.ConfigureBasic(&cfg)
-
-	intr := b.TickTimer.NewInterrupt(handleTick)
-	intr.SetPriority(0xc1)
-	intr.Enable()
-
-	b.TickTimer.StartWithInterrupts()
-}
-
-func handleWakeup(interrupt.Interrupt) {
-	if myBoard.SleepTimer.GetAndClearUpdateFlag() {
-		// Repeat is disable, but we also stop the timer when
-		// not waiting
-		myBoard.SleepTimer.Stop()
-
-		// timer was triggered
-		timerWakeup.Set(1)
-	}
-}
-
-func handleTick(interrupt.Interrupt) {
-	if myBoard.TickTimer.GetAndClearUpdateFlag() {
-		c := tickCount.Get()
-		tickCount.Set(c + 1)
-	}
-}

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"machine"
-	"runtime"
 	"time"
 )
 
@@ -27,7 +26,19 @@ func main() {
 
 	board := board{}
 	board.Initialize()
-	runtime.Board = &board
+	machine.InitializeBoard(&board)
+
+	go func() {
+		buf := []byte{0}
+
+		for {
+			n, _ := machine.UART0.Read(buf)
+			if n != 0 {
+				fmt.Printf("Got 0x%x\r\n", buf[0])
+			}
+			time.Sleep(50*time.Millisecond)
+		}
+	}()
 
 	i := 0
 	for {
