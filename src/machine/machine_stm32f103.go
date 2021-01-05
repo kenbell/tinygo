@@ -1,4 +1,4 @@
-// +build stm32,stm32f103
+// +build stm32,stm32f103,!stm32generic
 
 package machine
 
@@ -6,100 +6,10 @@ package machine
 
 import (
 	"device/stm32"
-	"unsafe"
 )
 
 func CPUFrequency() uint32 {
 	return 72000000
-}
-
-const (
-	PinInput       PinMode = 0 // Input mode
-	PinOutput10MHz PinMode = 1 // Output mode, max speed 10MHz
-	PinOutput2MHz  PinMode = 2 // Output mode, max speed 2MHz
-	PinOutput50MHz PinMode = 3 // Output mode, max speed 50MHz
-	PinOutput      PinMode = PinOutput2MHz
-
-	PinInputModeAnalog     PinMode = 0  // Input analog mode
-	PinInputModeFloating   PinMode = 4  // Input floating mode
-	PinInputModePullUpDown PinMode = 8  // Input pull up/down mode
-	PinInputModeReserved   PinMode = 12 // Input mode (reserved)
-
-	PinOutputModeGPPushPull   PinMode = 0  // Output mode general purpose push/pull
-	PinOutputModeGPOpenDrain  PinMode = 4  // Output mode general purpose open drain
-	PinOutputModeAltPushPull  PinMode = 8  // Output mode alt. purpose push/pull
-	PinOutputModeAltOpenDrain PinMode = 12 // Output mode alt. purpose open drain
-)
-
-// Configure this pin with the given I/O settings.
-// stm32f1xx uses different technique for setting the GPIO pins than the stm32f407
-func (p Pin) Configure(config PinConfig) {
-	// Configure the GPIO pin.
-	p.enableClock()
-	port := p.getPort()
-	pin := uint8(p) % 16
-	pos := (pin % 8) * 4
-	if pin < 8 {
-		port.CRL.ReplaceBits(uint32(config.Mode), 0xf, pos)
-	} else {
-		port.CRH.ReplaceBits(uint32(config.Mode), 0xf, pos)
-	}
-}
-
-func (p Pin) getPort() *stm32.GPIO_Type {
-	switch p / 16 {
-	case 0:
-		return stm32.GPIOA
-	case 1:
-		return stm32.GPIOB
-	case 2:
-		return stm32.GPIOC
-	case 3:
-		return stm32.GPIOD
-	case 4:
-		return stm32.GPIOE
-	case 5:
-		return stm32.GPIOF
-	case 6:
-		return stm32.GPIOG
-	default:
-		panic("machine: unknown port")
-	}
-}
-
-// enableClock enables the clock for this desired GPIO port.
-func (p Pin) enableClock() {
-	switch p / 16 {
-	case 0:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPAEN)
-	case 1:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPBEN)
-	case 2:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPCEN)
-	case 3:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPDEN)
-	case 4:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPEEN)
-	case 5:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPFEN)
-	case 6:
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_IOPGEN)
-	default:
-		panic("machine: unknown port")
-	}
-}
-
-// Enable peripheral clock. Expand to include all the desired peripherals
-func enableAltFuncClock(bus unsafe.Pointer) {
-	if bus == unsafe.Pointer(stm32.USART1) {
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_USART1EN)
-	} else if bus == unsafe.Pointer(stm32.USART2) {
-		stm32.RCC.APB1ENR.SetBits(stm32.RCC_APB1ENR_USART2EN)
-	} else if bus == unsafe.Pointer(stm32.I2C1) {
-		stm32.RCC.APB1ENR.SetBits(stm32.RCC_APB1ENR_I2C1EN)
-	} else if bus == unsafe.Pointer(stm32.SPI1) {
-		stm32.RCC.APB2ENR.SetBits(stm32.RCC_APB2ENR_SPI1EN)
-	}
 }
 
 //---------- UART related code

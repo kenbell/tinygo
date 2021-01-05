@@ -1,0 +1,17 @@
+{
+  "inherits": ["cortex-m"],
+	"llvm-target": "armv7m-none-eabi",
+  "build-tags": ["stm32generic", "stm32f103", "stm32f10x", "stm32f103xx", "stm32f1", "stm32"],
+	"cflags": [
+		"--target=armv7m-none-eabi",
+		"-Qunused-arguments"
+  ],
+  "linkerscript": "targets/stm32.ld",
+  "extra-files": [
+    "src/device/stm32/stm32f103.s"
+  ],
+  "flash-method": "openocd",
+  "openocd-interface": "stlink-v2",
+  "openocd-target": "stm32f1x",
+  "gdb": "arm-none-eabi-gdb"
+}
