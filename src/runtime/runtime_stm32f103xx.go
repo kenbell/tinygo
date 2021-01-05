@@ -1,4 +1,4 @@
-// +build stm32,stm32f103xx
+// +build stm32,stm32f103xx,!stm32generic
 
 package runtime
 

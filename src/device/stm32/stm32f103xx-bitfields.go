@@ -13,16 +13,6 @@ const (
 
 	// Reset and Clock Control Control Register flag values.
 
-	// System Clock source
-	RCC_CFGR_SW_HSI = 0
-	RCC_CFGR_SW_HSE = 1
-	RCC_CFGR_SW_PLL = 2
-
-	// Flags for when System Clock source is set.
-	RCC_CFGR_SWS_HSI = 0x00000000
-	RCC_CFGR_SWS_HSE = 0x00000004
-	RCC_CFGR_SWS_PLL = 0x00000008
-
 	// Sets PCLK1
 	RCC_CFGR_PPRE1_DIV_NONE = 0x00000000
 	RCC_CFGR_PPRE1_DIV_2    = 0x00000400

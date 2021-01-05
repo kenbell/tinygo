@@ -2,7 +2,13 @@
 
 package machine
 
-import "runtime"
+import (
+	"device/stm32"
+	"errors"
+	"runtime"
+)
+
+var ErrNotImplemented = errors.New("Not implemented")
 
 // CustomBoard is an interface that enables applications to provide their own
 // board & mcu initialization logic.
@@ -12,6 +18,7 @@ type CustomBoard interface {
 	TicksToNanoseconds(ticks int64) int64
 	NanosecondsToTicks(ns int64) int64
 	UART() GenericUART
+	LED() Pin
 }
 
 // Keep board private, so the only way to initialize is via function
@@ -25,12 +32,13 @@ func InitializeBoard(b CustomBoard) {
 	runtime.TicksToNanosecondsFn = b.TicksToNanoseconds
 	runtime.NanosecondsToTicksFn = b.NanosecondsToTicks
 
+	LED = b.LED()
+
 	UART0 = &UART{
 		Buffer: NewRingBuffer(),
 		impl:   board.UART(),
 	}
 	UART0.impl.SetReceiveCallback(UART0.Receive)
-
 	runtime.PutCharFn = func(ch byte) {
 		if UART0 != nil {
 			UART0.Write([]byte{ch})
@@ -67,4 +75,20 @@ func (uart *UART) WriteByte(c byte) error {
 	}
 
 	return uart.impl.WriteByte(c)
+}
+
+type SPI struct {
+	Bus *stm32.SPI_Type
+}
+
+func (spi SPI) Transfer(w byte) (byte, error) {
+	return 0, ErrNotImplemented
+}
+
+type I2C struct {
+	Bus *stm32.I2C_Type
+}
+
+func (i2c I2C) Tx(addr uint16, w, r []byte) error {
+	return ErrNotImplemented
 }
