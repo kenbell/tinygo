@@ -173,6 +173,10 @@ func (p Pin) enableClock() {
 		stm32.RCC.AHB2ENR.SetBits(stm32.RCC_AHB2ENR_GPIOFEN)
 	case 6:
 		stm32.RCC.AHB2ENR.SetBits(stm32.RCC_AHB2ENR_GPIOGEN)
+
+		// Special case for L5 - GPIOG is run from separate power
+		// so must be enabled to use G pins.
+		stm32.PWR.CR2.SetBits(stm32.PWR_CR2_IOSV)
 	case 7:
 		stm32.RCC.AHB2ENR.SetBits(stm32.RCC_AHB2ENR_GPIOHEN)
 	default:
