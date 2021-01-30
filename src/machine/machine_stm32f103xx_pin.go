@@ -163,7 +163,7 @@ func (p Pin) Configure(config PinConfig) {
 	}
 }
 
-func (p Pin) ConfigureAltFunc(config PinConfig, altFunc stm32.AltFunc) {
+func (p Pin) ConfigureAltFunc(config PinConfig, altFunc uint8) {
 	p.Configure(config)
 }
 
