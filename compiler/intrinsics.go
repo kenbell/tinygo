@@ -166,13 +166,24 @@ func (b *builder) createMachineKeepAliveImpl() {
 }
 
 var mathToLLVMMapping = map[string]string{
-	"math.Ceil":  "llvm.ceil.f64",
-	"math.Exp":   "llvm.exp.f64",
-	"math.Exp2":  "llvm.exp2.f64",
-	"math.Floor": "llvm.floor.f64",
-	"math.Log":   "llvm.log.f64",
-	"math.Sqrt":  "llvm.sqrt.f64",
-	"math.Trunc": "llvm.trunc.f64",
+	"math.Acos":   "llvm.acos.f64",
+	"math.Asin":   "llvm.asin.f64",
+	"math.Atan":   "llvm.atan.f64",
+	"math.Atan2":  "llvm.atan2.f64",
+	"math.Ceil":   "llvm.ceil.f64",
+	"math.Cos":    "llvm.cos.f64",
+	"math.Cosh":   "llvm.cosh.f64",
+	"math.Exp":    "llvm.exp.f64",
+	"math.Exp2":   "llvm.exp2.f64",
+	"math.Floor":  "llvm.floor.f64",
+	"math.Log":    "llvm.log.f64",
+	"math.Sin":    "llvm.sin.f64",
+	"math.Sincos": "llvm.sincos.f64",
+	"math.Sinh":   "llvm.sinh.f64",
+	"math.Sqrt":   "llvm.sqrt.f64",
+	"math.Tan":    "llvm.tan.f64",
+	"math.Tanh":   "llvm.tanh.f64",
+	"math.Trunc":  "llvm.trunc.f64",
 }
 
 // defineMathOp defines a math function body as a call to a LLVM intrinsic,
@@ -194,9 +205,18 @@ func (b *builder) defineMathOp() {
 	llvmFn := b.mod.NamedFunction(llvmName)
 	if llvmFn.IsNil() {
 		// The intrinsic doesn't exist yet, so declare it.
-		// At the moment, all supported intrinsics have the form "double
-		// foo(double %x)" so we can hardcode the signature here.
-		llvmType := llvm.FunctionType(b.ctx.DoubleType(), []llvm.Type{b.ctx.DoubleType()}, false)
+		var llvmType llvm.Type
+		switch b.fn.Name() {
+		case "Atan2":
+			// double atan2(double %y, double %x)
+			llvmType = llvm.FunctionType(b.ctx.DoubleType(), []llvm.Type{b.ctx.DoubleType(), b.ctx.DoubleType()}, false)
+		case "Sincos":
+			// {double, double} sincos(double %x)
+			llvmType = llvm.FunctionType(b.ctx.StructType([]llvm.Type{b.ctx.DoubleType(), b.ctx.DoubleType()}, false), []llvm.Type{b.ctx.DoubleType()}, false)
+		default:
+			// double foo(double %x)
+			llvmType = llvm.FunctionType(b.ctx.DoubleType(), []llvm.Type{b.ctx.DoubleType()}, false)
+		}
 		llvmFn = llvm.AddFunction(b.mod, llvmName, llvmType)
 	}
 	// Create a call to the intrinsic.
